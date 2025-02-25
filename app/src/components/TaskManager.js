@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Trash } from 'lucide-react';
 
 const API_URL = 'https://jsonplaceholder.typicode.com/todos';
 
@@ -14,7 +15,7 @@ export default function TaskManager() {
     const fetchTasks = async () => {
       try {
         const response = await axios.get(API_URL);
-        setTasks(response.data.slice(0, 5)); // Limit to 5 tasks
+        setTasks(response.data.slice(0, 10)); 
       } catch (error) {
         console.error('Error fetching tasks:', error);
       } finally {
@@ -28,7 +29,7 @@ export default function TaskManager() {
   const addTask = async () => {
     if (!newTask.trim()) return;
     
-    const taskData = { title: newTask, completed: false };
+    const taskData = { title: newTask, completed: false, status: 'Pending', priority: 'Medium' };
     try {
       const response = await axios.post(API_URL, taskData);
       setTasks([response.data, ...tasks]);
@@ -40,7 +41,7 @@ export default function TaskManager() {
   };
 
   const toggleComplete = (id) => {
-    setTasks(tasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task));
+    setTasks(tasks.map(task => task.id === id ? { ...task, completed: !task.completed, status: task.completed ? 'Pending' : 'Done' } : task));
   };
 
   const deleteTask = async (id) => {
@@ -53,8 +54,8 @@ export default function TaskManager() {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-gray-100 rounded-lg shadow-md">
-      <h1 className="text-xl font-bold mb-4">Task Manager</h1>
+    <div className=" mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
+      <h1 className="text-2xl font-bold mb-4">All Task</h1>
       <div className="mb-4 flex gap-2">
         <input
           type="text"
@@ -68,17 +69,34 @@ export default function TaskManager() {
       {loading ? (
         <p>Loading tasks...</p>
       ) : (
-        <ul className="space-y-2">
-          {tasks.map(task => (
-            <li key={task.id} className="p-2 bg-white flex justify-between items-center rounded shadow">
-              <span className={`flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>{task.title}</span>
-              <div className="flex gap-2">
-                <button onClick={() => toggleComplete(task.id)} className="text-green-500">✔</button>
-                <button onClick={() => deleteTask(task.id)} className="text-red-500">✖</button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <table className="w-full bg-white rounded shadow">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2 text-left">Tasks</th>
+              <th className="p-2 text-center">Status</th>
+              <th className="p-2 text-center">Priority</th>
+              <th className="p-2 text-center"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {tasks.map(task => (
+              <tr key={task.id} className="border-t">
+                <td className="p-2">{task.title}</td>
+                <td className="p-2 text-center">
+                  {task.completed ? <span className="text-green-500">✔ Done</span> : <span className="text-gray-500">● Pending</span>}
+                </td>
+                <td className="p-2 text-center">
+                  <span className={`px-2 py-1 rounded text-white ${task.priority === 'Urgent' ? 'bg-red-500' : task.priority === 'High' ? 'bg-orange-500' : 'bg-blue-500'}`}>{task.priority}</span>
+                </td>
+                <td className="p-2 text-center">
+                  <button onClick={() => deleteTask(task.id)} className="text-red-500">
+                    <Trash size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
