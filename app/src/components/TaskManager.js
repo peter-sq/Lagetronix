@@ -57,14 +57,8 @@ export default function TaskManager() {
     <div className=" mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-4">All Task</h1>
       <div className="mb-4 flex gap-2">
-        <input
-          type="text"
-          placeholder="Add a new task"
-          className="p-2 border rounded flex-1"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-        />
-        <button onClick={addTask} className="bg-blue-500 text-white px-4 py-2 rounded">Add</button>
+      
+        <button onClick={addTask} className="bg-blue-500 text-white px-4 py-2 rounded">Add a New tasks</button>
       </div>
       {loading ? (
         <p>Loading tasks...</p>
