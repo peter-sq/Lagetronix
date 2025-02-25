@@ -73,23 +73,43 @@ export default function TaskManager() {
             </tr>
           </thead>
           <tbody>
-            {tasks.map(task => (
-              <tr key={task.id} className="border-t">
+            {tasks.map((task) => (
+                <tr key={task.id} className="border-t">
                 <td className="p-2">{task.title}</td>
                 <td className="p-2 text-center">
-                  {task.completed ? <span className="text-green-500">✔ Done</span> : <span className="text-gray-500">● Pending</span>}
+                    {task.completed ? (
+                    <p className="flex items-center justify-center gap-1">
+                        <span className="w-6 h-6 flex items-center justify-center bg-green-300 text-white rounded-full">
+                        ✔
+                        </span>
+                        Done
+                    </p>
+                    ) : (
+                    <span className="text-gray-500">● Pending</span>
+                    )}
                 </td>
                 <td className="p-2 text-center">
-                  <span className={`px-2 py-1 rounded text-white ${task.priority === 'Urgent' ? 'bg-red-500' : task.priority === 'High' ? 'bg-orange-500' : 'bg-blue-500'}`}>{task.priority}</span>
+                    <span
+                    className={`px-2 py-1 rounded text-white ${
+                        task.priority === "Urgent"
+                        ? "bg-red-500"
+                        : task.priority === "High"
+                        ? "bg-orange-500"
+                        : "bg-blue-500"
+                    }`}
+                    >
+                    {task.priority}
+                    </span>
                 </td>
                 <td className="p-2 text-center">
-                  <button onClick={() => deleteTask(task.id)} className="text-red-500">
+                    <button onClick={() => deleteTask(task.id)} className="text-red-500">
                     <Trash size={16} />
-                  </button>
+                    </button>
                 </td>
-              </tr>
+                </tr>
             ))}
           </tbody>
+
         </table>
       )}
     </div>
