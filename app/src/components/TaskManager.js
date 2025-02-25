@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Trash } from 'lucide-react';
+import DeleteTaskModal from './DeleteTaskModale';
 
 const API_URL = 'https://jsonplaceholder.typicode.com/todos';
 
@@ -10,6 +11,8 @@ export default function TaskManager() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newTask, setNewTask] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -44,22 +47,32 @@ export default function TaskManager() {
     setTasks(tasks.map(task => task.id === id ? { ...task, completed: !task.completed, status: task.completed ? 'Pending' : 'Done' } : task));
   };
 
-  const deleteTask = async (id) => {
+  const confirmDeleteTask = (id) => {
+    setTaskToDelete(id);
+    setIsModalOpen(true);
+  };
+
+  const deleteTask = async () => {
+    if (!taskToDelete) return;
+
     try {
-      await axios.delete(`${API_URL}/${id}`);
-      setTasks(tasks.filter(task => task.id !== id));
+      await axios.delete(`${API_URL}/${taskToDelete}`);
+      setTasks(tasks.filter(task => task.id !== taskToDelete));
     } catch (error) {
       console.error('Error deleting task:', error);
     }
+
+    setTaskToDelete(null);
+    setIsModalOpen(false);
   };
 
   return (
-    <div className=" mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4">All Task</h1>
+    <div className="mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
+      <h1 className="text-2xl font-bold mb-4">All Tasks</h1>
       <div className="mb-4 flex gap-2">
-      
-        <button onClick={addTask} className="bg-blue-500 text-white px-4 py-2 rounded">Add a New tasks</button>
+        <button onClick={addTask} className="bg-blue-500 text-white px-4 py-2 rounded">Add a New Task</button>
       </div>
+
       {loading ? (
         <p>Loading tasks...</p>
       ) : (
@@ -74,44 +87,52 @@ export default function TaskManager() {
           </thead>
           <tbody>
             {tasks.map((task) => (
-                <tr key={task.id} className="border-t">
+              <tr key={task.id} className="border-t">
                 <td className="p-2">{task.title}</td>
                 <td className="p-2 text-center">
-                    {task.completed ? (
+                  {task.completed ? (
                     <p className="flex items-center justify-center gap-1">
-                        <span className="w-6 h-6 flex items-center justify-center bg-green-300 text-white rounded-full">
-                        ✔
-                        </span>
-                        Done
+                      <span className="w-4 h-4 flex items-center justify-center bg-green-600 text-white rounded-full">✔</span>
+                      Done
                     </p>
-                    ) : (
-                    <span className="text-gray-500">● Pending</span>
-                    )}
+                  ) : (
+                    <p className="flex items-center justify-center gap-1">
+                      <span className="w-4 h-4 flex items-center justify-center bg-gray-400 text-grey-400 rounded-full"></span>
+                      Pending
+                    </p>
+                  )}
                 </td>
                 <td className="p-2 text-center">
                     <span
-                    className={`px-2 py-1 rounded text-white ${
+                        className={`px-2 py-1 rounded ${
                         task.priority === "Urgent"
-                        ? "bg-red-500"
-                        : task.priority === "High"
-                        ? "bg-orange-500"
-                        : "bg-blue-500"
-                    }`}
+                            ? "bg-red-500 text-white"
+                            : task.priority === "High"
+                            ? "bg-orange-500 text-white"
+                            : "bg-blue-500 text-white"
+                        }`}
                     >
-                    {task.priority}
+                        {task.priority}
                     </span>
-                </td>
+                    </td>
+
                 <td className="p-2 text-center">
-                    <button onClick={() => deleteTask(task.id)} className="text-red-500">
+                  <button onClick={() => confirmDeleteTask(task.id)} className="text-red-500">
                     <Trash size={16} />
-                    </button>
+                  </button>
                 </td>
-                </tr>
+              </tr>
             ))}
           </tbody>
-
         </table>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteTaskModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={deleteTask}
+      />
     </div>
   );
 }
